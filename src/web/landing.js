@@ -54,30 +54,32 @@ const CSS = `
   .hcard h3{margin:auto 0 16px;font-size:clamp(28px,3.9vw,46px);font-weight:550;letter-spacing:-.02em}
   .hcard p{margin:0;color:var(--muted-fg);font-size:clamp(17px,1.5vw,20px);line-height:1.55;max-width:60ch}
 
-  /* WHY IT MATTERS — pinned full-screen word reveal */
-  .why-sec{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:30px 0}
-  .whytext{font-size:clamp(34px,6.4vw,88px);line-height:1.16;color:var(--fg);margin:22px 0 0;max-width:1100px;letter-spacing:-.025em;font-weight:550}
-  .whytext em{color:var(--life);font-style:normal}
-  .whytext .wd{display:inline-block;will-change:filter,color,opacity}
+  /* WHY IT MATTERS — numbered points, per-item scroll reveal */
+  .why-sec{padding:80px 0 110px}
+  .whylist{list-style:none;margin:44px 0 0;padding:0;display:flex;flex-direction:column;gap:clamp(44px,8vh,104px)}
+  .whyitem{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,4vw,56px);align-items:start}
+  .whyitem .wn{font-family:var(--mono);font-size:clamp(15px,1.3vw,19px);color:var(--life);padding-top:.7em;letter-spacing:.02em}
+  .whyitem p{margin:0;font-size:clamp(28px,4.8vw,60px);line-height:1.16;font-weight:550;letter-spacing:-.02em;color:var(--fg)}
+  .whyitem .wd{display:inline-block;will-change:filter,color,opacity}
 
   /* WHAT YOU GET — bento (staggered reveal) */
-  .bento{display:grid;grid-template-columns:1fr;gap:12px}
-  @media(min-width:780px){.bento{grid-template-columns:repeat(6,1fr)}.bento .s3{grid-column:span 3}.bento .s2{grid-column:span 2}}
-  .fc{background:oklch(0.115 0 0);border:1px solid oklch(0.20 0 0);border-radius:16px;padding:22px 24px;grid-column:span 6;display:flex;flex-direction:column;transition:border-color .2s}
+  .bento{display:flex;flex-direction:column;gap:16px}
+  .fc{background:oklch(0.115 0 0);border:1px solid oklch(0.20 0 0);border-radius:22px;padding:clamp(32px,4vw,52px);display:flex;flex-direction:column;transition:border-color .2s}
   .fc:hover{border-color:oklch(0.28 0 0)}
-  .fc .fe{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-fg);display:flex;align-items:center;gap:8px}
-  .fc .fe .d{width:5px;height:5px;border-radius:50%;background:var(--life)}
-  .fc h3{margin:11px 0 6px;font-size:19px;font-weight:550;letter-spacing:-.015em}
-  .fc p{margin:0;color:var(--muted-fg);font-size:14.5px;line-height:1.55}
+  .fc .fe{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-fg);display:flex;align-items:center;gap:9px}
+  .fc .fe .d{width:6px;height:6px;border-radius:50%;background:var(--life)}
+  .fc h3{margin:16px 0 10px;font-size:clamp(24px,2.9vw,36px);font-weight:550;letter-spacing:-.02em}
+  .fc p{margin:0;color:var(--muted-fg);font-size:clamp(16px,1.5vw,19px);line-height:1.6;max-width:74ch}
 
   .faq{max-width:none}
   .fitem{border-bottom:1px solid var(--border-soft)}
-  .fq{width:100%;text-align:left;background:none;border:0;color:var(--fg);font:inherit;font-size:17px;font-weight:500;
-    padding:24px 4px;display:flex;justify-content:space-between;align-items:center;gap:14px;cursor:pointer}
+  .fq{width:100%;text-align:left;background:none;border:0;color:var(--fg);font:inherit;font-size:clamp(20px,2.2vw,27px);font-weight:500;letter-spacing:-.01em;
+    padding:30px 4px;display:flex;justify-content:space-between;align-items:center;gap:18px;cursor:pointer}
   .fq .ic{color:var(--muted-fg);transition:transform .2s,color .2s;flex:0 0 auto}
+  .fq .ic svg{width:24px;height:24px}
   .fitem.open .fq .ic{transform:rotate(45deg);color:var(--life)}
-  .fa{max-height:0;overflow:hidden;transition:max-height .28s ease}
-  .fa .inner{padding:0 4px 26px;color:var(--muted-fg);font-size:15.5px;line-height:1.7;max-width:none}
+  .fa{max-height:0;overflow:hidden;transition:max-height .3s ease}
+  .fa .inner{padding:0 4px 32px;color:var(--muted-fg);font-size:clamp(16px,1.5vw,19px);line-height:1.7;max-width:none}
 
   /* CLOSING — glowing panel */
   .closing{width:100vw;margin:44px calc(50% - 50vw) 30px;padding:0 clamp(24px,4vw,64px)}
@@ -129,7 +131,12 @@ ${headerHtml({ links: [
 
   <section class="why-sec">
     <div class="eyebrow" data-reveal><span class="sq"></span><span class="lbl">Why it matters</span><span class="dots"></span></div>
-    <p class="whytext" id="whytext">Real match analysis was built for academies and pro clubs: expensive cameras, monthly subscriptions, and your footage on someone else's servers. The millions of people coaching kids on a Sunday morning get none of it. <em>Gaffer gives every coach that same edge</em>, for free, on the phone already in their pocket.</p>
+    <ol class="whylist" id="whylist">
+      <li class="whyitem"><span class="wn">01</span><p>Real match analysis was built for academies and pro clubs: expensive cameras and monthly subscriptions.</p></li>
+      <li class="whyitem"><span class="wn">02</span><p>Your footage ends up sitting on someone else's servers.</p></li>
+      <li class="whyitem"><span class="wn">03</span><p>The millions of people coaching kids on a Sunday morning get none of it.</p></li>
+      <li class="whyitem"><span class="wn">04</span><p>Gaffer gives every coach that same edge, for free, on the phone already in their pocket.</p></li>
+    </ol>
   </section>
 
   <section id="features">
@@ -188,22 +195,16 @@ requestAnimationFrame(()=>{ const f=document.querySelector('.fitem.open .fa'); i
 const hdr=document.getElementById('hdr');
 addEventListener('scroll',()=>hdr.classList.toggle('scrolled',scrollY>8),{passive:true});
 
-/* wrap the why text into per-word spans (keep the accent phrase intact) */
+/* wrap each why point into per-word spans for the scroll reveal */
 (function(){
-  const el=document.getElementById('whytext'); if(!el) return;
-  const walk=(node)=>{
-    [...node.childNodes].forEach(n=>{
-      if(n.nodeType===3){
-        const frag=document.createDocumentFragment();
-        n.textContent.split(/(\\s+)/).forEach(t=>{
-          if(/^\\s+$/.test(t)) frag.appendChild(document.createTextNode(t));
-          else if(t){ const s=document.createElement('span'); s.className='wd'; s.textContent=t; frag.appendChild(s); }
-        });
-        n.replaceWith(frag);
-      } else if(n.nodeType===1){ walk(n); }
+  document.querySelectorAll('.whyitem p').forEach(el=>{
+    const frag=document.createDocumentFragment();
+    el.textContent.split(/(\\s+)/).forEach(t=>{
+      if(/^\\s+$/.test(t)) frag.appendChild(document.createTextNode(t));
+      else if(t){ const s=document.createElement('span'); s.className='wd'; s.textContent=t; frag.appendChild(s); }
     });
-  };
-  walk(el);
+    el.textContent=''; el.appendChild(frag);
+  });
 })();
 
 /* GSAP — progressive enhancement */
@@ -242,13 +243,13 @@ function animate(){
     }
   })();
 
-  // WHY IT MATTERS: pinned full-screen word reveal (grey+blur -> white+sharp)
-  (function(){
-    const words=g.utils.toArray('#whytext .wd'); if(!words.length) return;
-    g.set(words,{color:'#3a3a3a',filter:'blur(7px)',opacity:.5});
-    g.to(words,{color:'#f1f3f1',filter:'blur(0px)',opacity:1,ease:'none',stagger:.5,
-      scrollTrigger:{trigger:'.why-sec',start:'top top',end:'+=150%',pin:true,scrub:.4}});
-  })();
+  // WHY IT MATTERS: each numbered point lights up (grey+blur -> white+sharp) as it scrolls in
+  document.querySelectorAll('.whyitem').forEach(item=>{
+    const words=item.querySelectorAll('.wd'); if(!words.length) return;
+    g.set(words,{color:'#3a3a3a',filter:'blur(6px)'});
+    g.to(words,{color:'#f1f3f1',filter:'blur(0px)',ease:'none',stagger:.12,
+      scrollTrigger:{trigger:item,start:'top 82%',end:'top 42%',scrub:.4}});
+  });
 
   // WHAT YOU GET: staggered bento reveal (distinct from How it works)
   document.querySelectorAll('[data-cards]').forEach(grp=>{
