@@ -14,9 +14,8 @@ import { loadLLM, synthesizeSpeech } from './qvac/runtime.js';
 import { wavBuffer } from './wav.js';
 import { translateText, SUPPORTED_LANGS } from './translate.js';
 import { tagUtterance } from './tagger.js';
-import { synthesize } from './synthesize.js';
+import { synthesize, generateReport } from './synthesize.js';
 import { MatchTimeline } from './timeline.js';
-import { demoMatch } from './fixtures/demo-match.js';
 import { LANDING } from './web/landing.js';
 import { APP_PAGE } from './web/app-page.js';
 import { LOGO_PAGE } from './web/logo.js';
@@ -67,6 +66,37 @@ function vendorFile(name) {
   return _vendorCache[name];
 }
 
+// The app owns its team/squad and sends it with each request — the server keeps no fixture.
+function delegateOpts() {
+  return providerKey ? { providerPublicKey: providerKey, timeout: 60_000, fallbackToLocal: true } : undefined;
+}
+function rosterOf(body) {
+  return Array.isArray(body.roster)
+    ? body.roster.slice(0, 40).map((pl) => ({
+        number: Number(pl.number) || 0,
+        name: String(pl.name || '').slice(0, 40),
+        position: pl.position ? String(pl.position).slice(0, 12) : undefined,
+      }))
+    : [];
+}
+function buildTimeline(body) {
+  const tl = new MatchTimeline({
+    team: String(body.team || 'Our team').slice(0, 60),
+    opponent: String(body.opponent || 'Opponent').slice(0, 60),
+    roster: rosterOf(body),
+  });
+  for (const u of (Array.isArray(body.utterances) ? body.utterances : []).slice(0, 80)) {
+    const uu = tl.addUtterance({ text: String(u.text || '').slice(0, 400), tMs: Number(u.tMs) || 0 });
+    tl.applyTags(uu.id, {
+      players: Array.isArray(u.players) ? u.players.map(Number).filter(Number.isFinite) : [],
+      phase: u.phase,
+      themes: Array.isArray(u.themes) ? u.themes : [],
+      sentiment: u.sentiment,
+    });
+  }
+  return tl;
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const p = url.pathname;
@@ -95,54 +125,45 @@ const server = http.createServer(async (req, res) => {
   if (p === '/app') return html(res, APP_PAGE);
   if (p === '/logo') return html(res, LOGO_PAGE);
 
-  // --- config ---
+  // --- config (no team here — the app owns its own squad) ---
   if (p === '/api/config') {
-    return json(res, {
-      delegated: Boolean(providerKey),
-      providerKey,
-      langs: SUPPORTED_LANGS,
-      team: demoMatch.team,
-      opponent: demoMatch.opponent,
-      roster: demoMatch.roster,
-    });
+    return json(res, { delegated: Boolean(providerKey), providerKey, langs: SUPPORTED_LANGS });
   }
 
-  // --- live single-remark tagging ---
-  if (p === '/api/tag') {
-    const text = (url.searchParams.get('text') || '').slice(0, 400).trim();
-    if (!text) return json(res, { error: 'empty remark' }, 400);
+  // --- live single-remark tagging against the coach's own squad ---
+  if (p === '/api/tag' && req.method === 'POST') {
     try {
-      const tags = await tagUtterance({ text }, demoMatch.roster);
-      const players = tags.players.map((n) => ({
-        n,
-        name: demoMatch.roster.find((pl) => pl.number === n)?.name ?? '',
-      }));
+      const body = await readJson(req);
+      const text = String(body.text || '').slice(0, 400).trim();
+      if (!text) return json(res, { error: 'empty remark' }, 400);
+      const roster = rosterOf(body);
+      const tags = await tagUtterance({ text }, roster);
+      const players = tags.players.map((n) => ({ n, name: roster.find((pl) => pl.number === n)?.name ?? '' }));
       return json(res, { players, phase: tags.phase, themes: tags.themes, sentiment: tags.sentiment ?? 0 });
     } catch (err) {
       return json(res, { error: err.message }, 500);
     }
   }
 
-  // --- half-time synthesis over the coach's actual remarks ---
+  // --- half-time plan over the coach's actual remarks ---
   if (p === '/api/synthesize' && req.method === 'POST') {
     try {
-      const { utterances = [], half = true } = await readJson(req);
-      const tl = new MatchTimeline({ team: demoMatch.team, opponent: demoMatch.opponent, roster: demoMatch.roster });
-      for (const u of utterances.slice(0, 60)) {
-        const uu = tl.addUtterance({ text: String(u.text || '').slice(0, 400), tMs: Number(u.tMs) || 0 });
-        tl.applyTags(uu.id, {
-          players: Array.isArray(u.players) ? u.players : [],
-          phase: u.phase,
-          themes: Array.isArray(u.themes) ? u.themes : [],
-          sentiment: u.sentiment,
-        });
-      }
-      const delegate = providerKey
-        ? { providerPublicKey: providerKey, timeout: 60_000, fallbackToLocal: true }
-        : undefined;
+      const body = await readJson(req);
       const t0 = Date.now();
-      const { adjustments, delegated } = await synthesize(tl, { half, delegate });
+      const { adjustments, delegated } = await synthesize(buildTimeline(body), { half: body.half !== false, delegate: delegateOpts() });
       return json(res, { adjustments, delegated, ms: Date.now() - t0 });
+    } catch (err) {
+      return json(res, { error: err.message }, 500);
+    }
+  }
+
+  // --- full-time report ---
+  if (p === '/api/report' && req.method === 'POST') {
+    try {
+      const body = await readJson(req);
+      const t0 = Date.now();
+      const { report, delegated } = await generateReport(buildTimeline(body), { delegate: delegateOpts() });
+      return json(res, { report, delegated, ms: Date.now() - t0 });
     } catch (err) {
       return json(res, { error: err.message }, 500);
     }

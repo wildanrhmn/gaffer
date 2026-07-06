@@ -7,7 +7,7 @@
 
 import { loadLLM, chat } from './qvac/runtime.js';
 import { MODELS } from './qvac/models.js';
-import { synthesisMessages } from './prompts.js';
+import { synthesisMessages, reportMessages } from './prompts.js';
 
 /**
  * Split the model's "1. ... 2. ... 3. ..." output into clean adjustment strings.
@@ -43,4 +43,16 @@ export async function synthesize(timeline, { half = true, delegate } = {}) {
   });
   const raw = await chat(modelId, synthesisMessages(timeline, { half }));
   return { adjustments: parseAdjustments(raw), raw, delegated: Boolean(delegate) };
+}
+
+/**
+ * Full-time report from the coach's own notes (patterns + per-player notes).
+ * @param {import('./timeline.js').MatchTimeline} timeline
+ * @param {{ delegate?: object }} [opts]
+ * @returns {Promise<{ report: string, delegated: boolean }>}
+ */
+export async function generateReport(timeline, { delegate } = {}) {
+  const modelId = await loadLLM({ key: 'synth', modelSrc: MODELS.synth, modelType: 'llm', delegate });
+  const raw = await chat(modelId, reportMessages(timeline));
+  return { report: raw.trim(), delegated: Boolean(delegate) };
 }

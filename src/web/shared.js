@@ -55,7 +55,8 @@ export const STYLE = /* css */ `
   html{scroll-behavior:smooth;overflow-x:clip}
   img,svg,video{max-width:100%}
   body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--sans);
-    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;min-height:100vh;display:flex;flex-direction:column}
+  body>main{flex:1 0 auto}
   body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
     background:
       radial-gradient(820px 500px at 50% -8%, oklch(0.74 0.18 162 / .09), transparent 70%),
@@ -113,7 +114,7 @@ export const STYLE = /* css */ `
   .dim{color:var(--muted-fg)}
 
   /* footer */
-  footer{margin-top:40px;border-top:1px solid var(--border-soft);padding:44px 0 64px}
+  footer{margin-top:auto;border-top:1px solid var(--border-soft);padding:44px 0 64px}
   .foot{display:flex;gap:26px;justify-content:space-between;flex-wrap:wrap;align-items:flex-start}
   .foot .brand .wm{font-size:20px}
   .foot .desc{color:var(--muted-fg);font-size:14px;max-width:340px;margin-top:12px;line-height:1.6}

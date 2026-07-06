@@ -76,6 +76,21 @@ export function synthesisMessages(timeline, { half = true } = {}) {
 }
 
 /**
+ * Messages for a concise post-match report built from the coach's own notes.
+ * @param {import('./timeline.js').MatchTimeline} timeline
+ */
+export function reportMessages(timeline) {
+  const system =
+    "You are a football analyst writing a short post-match report from a coach's own " +
+    'timestamped touchline notes. Output plain text in exactly two labelled sections, nothing else:\n' +
+    'PATTERNS:\n- 2 to 3 lines, each a recurring tactical pattern with the player numbers involved.\n' +
+    'PLAYERS:\n- one short line per OUR player who came up, formatted "#N Name: specific useful note".\n' +
+    'Be specific and grounded in the notes. No generic filler, no coaching-advice section.';
+  const user = `${timeline.toPromptContext()}\n\nReport:`;
+  return [{ role: 'user', content: `${system}\n\n${user}` }];
+}
+
+/**
  * Best-effort JSON extraction from a small model's text output.
  * Handles code fences and leading/trailing prose.
  * @returns {any|null}
