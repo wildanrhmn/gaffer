@@ -8,8 +8,11 @@
 // Open http://localhost:4600
 
 import http from 'node:http';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { verifyModels, MODELS, MODEL_TYPES, TTS_SAMPLE_RATE } from './qvac/models.js';
+import { transcribeClip } from './stt.js';
 import { loadLLM, synthesizeSpeech } from './qvac/runtime.js';
 import { wavBuffer } from './wav.js';
 import { translateText, SUPPORTED_LANGS } from './translate.js';
@@ -39,7 +42,7 @@ function readJson(req) {
     let data = '';
     req.on('data', (c) => {
       data += c;
-      if (data.length > 1_000_000) reject(new Error('body too large'));
+      if (data.length > 6_000_000) reject(new Error('body too large'));
     });
     req.on('end', () => {
       try {
@@ -142,6 +145,28 @@ const server = http.createServer(async (req, res) => {
       return json(res, { players, phase: tags.phase, themes: tags.themes, sentiment: tags.sentiment ?? 0 });
     } catch (err) {
       return json(res, { error: err.message }, 500);
+    }
+  }
+
+  // --- voice note: transcribe an audio clip on-device (Whisper) and tag it ---
+  if (p === '/api/voicenote' && req.method === 'POST') {
+    let tmp;
+    try {
+      const body = await readJson(req);
+      const b64 = String(body.audio || '');
+      if (!b64) return json(res, { error: 'no audio' }, 400);
+      tmp = join(tmpdir(), `gaffer-${process.pid}-${Date.now()}-${Math.floor(Math.random() * 1e6)}.wav`);
+      writeFileSync(tmp, Buffer.from(b64, 'base64'));
+      const text = (await transcribeClip(tmp)).trim();
+      if (!text) return json(res, { text: '', players: [], phase: 'general', themes: [], sentiment: 0 });
+      const roster = rosterOf(body);
+      const tags = await tagUtterance({ text }, roster);
+      const players = tags.players.map((n) => ({ n, name: roster.find((pl) => pl.number === n)?.name ?? '' }));
+      return json(res, { text, players, phase: tags.phase, themes: tags.themes, sentiment: tags.sentiment ?? 0 });
+    } catch (err) {
+      return json(res, { error: err.message }, 500);
+    } finally {
+      if (tmp) try { unlinkSync(tmp); } catch { /* ignore */ }
     }
   }
 
