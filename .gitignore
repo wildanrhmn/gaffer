@@ -1,0 +1,20 @@
+node_modules/
+.qvac/
+*.log
+.DS_Store
+dist/
+build/
+.env
+.env.local
+# QVAC model cache / downloaded artifacts
+models/
+*.gguf
+*.bin
+*.onnx
+# Local match data (may contain minors' data — never commit)
+data/
+recordings/
+*.wav
+*.pcm
+# Pear staging
+.pear/

@@ -1,0 +1,24 @@
+{
+  "name": "gaffer",
+  "version": "0.1.0",
+  "description": "Private, offline AI film room for grassroots football. On-device analysis with Tether QVAC + Pears P2P.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.17"
+  },
+  "scripts": {
+    "provider": "node src/provider.js",
+    "demo": "node src/demo.js",
+    "ui": "node src/server.js",
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@qvac/sdk": "^0.14.1",
+    "b4a": "^1.6.7",
+    "corestore": "^7.11.0",
+    "hyperdrive": "^13.3.2",
+    "hyperswarm": "^4.17.0"
+  }
+}
