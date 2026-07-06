@@ -20,6 +20,7 @@ import { demoMatch } from './fixtures/demo-match.js';
 import { LANDING } from './web/landing.js';
 import { APP_PAGE } from './web/app-page.js';
 import { LOGO_PAGE } from './web/logo.js';
+import { faviconSvg } from './web/shared.js';
 
 const PORT = Number(process.env.PORT || 4600);
 const providerKey = process.env.GAFFER_PROVIDER?.trim() || null;
@@ -79,6 +80,13 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(404);
       res.end('not found');
     }
+    return;
+  }
+
+  // --- favicon (from the picked mark) ---
+  if (p === '/favicon.svg' || p === '/favicon.ico') {
+    res.writeHead(200, { 'content-type': 'image/svg+xml; charset=utf-8', 'cache-control': 'public, max-age=86400' });
+    res.end(faviconSvg());
     return;
   }
 

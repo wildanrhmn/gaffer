@@ -29,6 +29,14 @@ export function markSvg(id, size = 24, extra = '') {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${paths}</svg>`;
 }
 
+/** Standalone favicon from the picked mark: green mark on a dark rounded square. */
+export function faviconSvg(id = DEFAULT_MARK) {
+  const paths = MARK_PATHS[id] || MARK_PATHS[DEFAULT_MARK];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">` +
+    `<rect width="24" height="24" rx="6" fill="#0b0b0b"/>` +
+    `<g fill="none" stroke="#3ddc61" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${paths}</g></svg>`;
+}
+
 // --- Fonts + stylesheet ------------------------------------------------------------
 export const FONT_LINKS = ``;
 
@@ -157,6 +165,7 @@ export function doc({ title, body, script = '', style = '', gsap = false }) {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${title}</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 ${FONT_LINKS}
 <style>${STYLE}${style}</style>
 </head>
