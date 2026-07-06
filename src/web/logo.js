@@ -5,7 +5,7 @@ import { doc, headerHtml, footerHtml, MARKS, markSvg } from './shared.js';
 const CSS = `
   .lhead{padding:128px 0 6px}
   .lhead h1{font-size:clamp(30px,4.4vw,46px);letter-spacing:-.02em;margin:0;font-weight:500}
-  .lhead h1 em{font-family:var(--serif);font-style:italic;color:var(--life);font-weight:400}
+  .lhead h1 em{font-style:normal;color:var(--life)}
   .opts{display:grid;grid-template-columns:1fr;gap:16px;margin-top:30px}
   @media(min-width:760px){.opts{grid-template-columns:1fr 1fr}}
   .opt{text-align:left;background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:20px;cursor:pointer;transition:border-color .2s,background .2s}

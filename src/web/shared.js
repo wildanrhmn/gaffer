@@ -30,10 +30,7 @@ export function markSvg(id, size = 24, extra = '') {
 }
 
 // --- Fonts + stylesheet ------------------------------------------------------------
-export const FONT_LINKS = `
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />`;
+export const FONT_LINKS = ``;
 
 export const STYLE = /* css */ `
   :root{
@@ -71,7 +68,7 @@ export const STYLE = /* css */ `
     border-radius:999px;padding-left:20px;padding-right:8px;transition:background .25s,border-color .25s}
   .hdr.scrolled .pill{background:oklch(0.085 0 0 / .9)}
   .brand{display:flex;align-items:center;gap:9px;color:var(--fg)}
-  .brand .wm{font-family:var(--serif);font-style:italic;font-size:23px;letter-spacing:-.01em;line-height:1}
+  .brand .wm{font-size:19px;font-weight:650;letter-spacing:-.03em;line-height:1}
   .hlinks{display:flex;justify-content:center;gap:2px}
   .hlinks a{color:var(--muted-fg);font-size:14px;padding:8px 14px;border-radius:999px;transition:color .15s,background .15s}
   .hlinks a:hover{color:var(--fg);background:oklch(0.16 0 0 / .6)}
@@ -100,8 +97,8 @@ export const STYLE = /* css */ `
   .eyebrow .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:oklch(0.96 0 0 / .72)}
   .eyebrow .dots{flex:1;height:2px;opacity:.6;
     background-image:radial-gradient(circle, rgba(255,255,255,.42) 1px, transparent 1px);background-size:8px 2px;background-repeat:repeat-x}
-  .lede{font-size:clamp(28px,4vw,44px);line-height:1.12;letter-spacing:-.02em;margin:0;font-weight:500;max-width:780px}
-  .lede em{font-family:var(--serif);font-style:italic;font-weight:400}
+  .lede{font-size:clamp(28px,4vw,44px);line-height:1.12;letter-spacing:-.02em;margin:0;font-weight:500;max-width:820px}
+  .lede em{font-style:normal;color:var(--life)}
   .lede .mut{color:var(--muted-fg)}
   .say-lede{color:var(--muted-fg);font-size:17px;max-width:620px;margin:18px 0 0;line-height:1.65}
   .dim{color:var(--muted-fg)}

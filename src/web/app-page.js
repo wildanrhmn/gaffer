@@ -6,7 +6,7 @@ import { doc, headerHtml, footerHtml } from './shared.js';
 const CSS = `
   .apphead{padding:132px 0 8px}
   .apptitle{font-size:clamp(30px,4.4vw,46px);line-height:1.1;letter-spacing:-.02em;margin:0;font-weight:500}
-  .apptitle em{font-family:var(--serif);font-style:italic;color:var(--life);font-weight:400}
+  .apptitle em{font-style:normal;color:var(--life)}
   .grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:30px}
   @media(min-width:920px){.grid{grid-template-columns:1.15fr .85fr;align-items:start}}
   .card{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px}
