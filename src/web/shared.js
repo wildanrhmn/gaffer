@@ -129,7 +129,7 @@ export function footerHtml() {
   return `<footer><div class="wrap foot">
     <div>
       <a class="brand" href="/">${markSvg(DEFAULT_MARK, 20)}<span class="wm">gaffer</span></a>
-      <div class="desc">The assistant coach for grassroots football. It listens, keeps track of the match, and hands you a plan at half-time — all on your own phone.</div>
+      <div class="desc">The assistant coach for grassroots football. It listens, keeps track of the match, and hands you a plan at half-time, all on your own phone.</div>
       <div class="fine">Made for touchline coaches · runs on your device</div>
     </div>
     <div class="links">
