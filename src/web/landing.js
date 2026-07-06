@@ -92,6 +92,35 @@ const CSS = `
   .closing-card h2 em{font-style:normal;color:var(--life)}
   .closing-card p{position:relative;color:var(--muted-fg);font-size:18px;margin:20px auto 0;max-width:520px}
   .closing-card .herocta{position:relative;margin-top:36px}
+
+  @media(max-width:680px){
+    .hero{padding:116px 0 52px}
+    h1{font-size:clamp(38px,11.5vw,62px);letter-spacing:-.03em}
+    .hero .say-lede{font-size:17px;margin-top:26px}
+    .herocta{margin-top:32px}
+    .btn.lg{padding:13px 20px;font-size:14.5px}
+    .steps{display:none}
+    .how-deck{gap:14px}
+    .hcard{min-height:0;padding:26px 24px;border-radius:20px}
+    .hcard .row{align-items:flex-start}
+    .hcard .ico{width:50px;height:50px}
+    .hcard .ico svg{width:24px;height:24px}
+    .hcard .idx{font-size:52px}
+    .hcard h3{margin:20px 0 12px;font-size:25px}
+    .hcard p{font-size:16px}
+    .whyitem{gap:16px}
+    .whyitem .wn{font-size:13px;padding-top:.35em}
+    .whyitem p{font-size:clamp(24px,7.6vw,34px)}
+    .fc{padding:26px 22px;border-radius:18px}
+    .fc h3{font-size:23px}
+    .fc p{font-size:16px}
+    .fq{font-size:20px;padding:22px 4px;gap:14px}
+    .fa .inner{font-size:16px;padding-bottom:26px}
+    .closing{padding:0 14px}
+    .closing-card{padding:56px 26px;border-radius:24px}
+    .closing-card h2{font-size:clamp(30px,9vw,46px)}
+    .closing-card p{font-size:16px}
+  }
 `;
 
 const BODY = `
@@ -226,22 +255,24 @@ function animate(){
 
   document.querySelectorAll('[data-reveal]').forEach(el=>g.from(el,{y:26,opacity:0,duration:.7,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%'}}));
 
-  // HOW IT WORKS: pinned card deck — one in focus, previous falls back + blurs
-  (function(){
+  // HOW IT WORKS: pinned card deck on desktop; on mobile it falls back to a simple
+  // stacked list (matchMedia auto-reverts the pin/timeline when the query stops matching).
+  g.matchMedia().add('(min-width: 760px)', () => {
     const stage=document.getElementById('howStage'), deck=document.getElementById('howDeck');
     const cards=g.utils.toArray('#howDeck .hcard'); if(cards.length<2) return;
     stage.classList.add('pinned'); deck.classList.add('stacked');
     const steps=document.querySelectorAll('#steps b');
     g.set(cards,{opacity:0,yPercent:26,scale:.9,filter:'blur(6px)'});
     g.set(cards[0],{opacity:1,yPercent:0,scale:1,filter:'blur(0px)'});
-    steps[0].classList.add('on');
+    steps.forEach((s,k)=>s.classList.toggle('on',k===0));
     const tl=g.timeline({scrollTrigger:{trigger:stage,start:'top top',end:'+='+(cards.length*430),pin:true,scrub:.5,
       onUpdate:(self)=>{ const i=Math.round(self.progress*(cards.length-1)); steps.forEach((s,k)=>s.classList.toggle('on',k<=i)); }}});
     for(let i=1;i<cards.length;i++){
       tl.to(cards[i-1],{yPercent:-26,scale:.86,opacity:0,filter:'blur(10px)',ease:'none'},i-1)
         .to(cards[i],{yPercent:0,scale:1,opacity:1,filter:'blur(0px)',ease:'none'},i-1);
     }
-  })();
+    return () => { stage.classList.remove('pinned'); deck.classList.remove('stacked'); g.set(cards,{clearProps:'all'}); };
+  });
 
   // WHY IT MATTERS: each numbered point lights up (grey+blur -> white+sharp) as it scrolls in
   document.querySelectorAll('.whyitem').forEach(item=>{

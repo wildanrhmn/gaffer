@@ -64,7 +64,7 @@ ${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#feat
   <section class="apphead">
     <div class="eyebrow"><span class="sq"></span><span class="lbl" id="vs">Your match</span><span class="dots"></span></div>
     <h1 class="apptitle">Coach the match. <em>Get the plan.</em></h1>
-    <p class="say-lede">Add what you would call out from the touchline — by name or number. Each note is tagged on your device as you go. When you are ready, get your half-time plan.</p>
+    <p class="say-lede">Add what you would call out from the touchline, by name or number. Each note is tagged on your device as you go. When you are ready, get your half-time plan.</p>
   </section>
 
   <section style="padding-top:0">

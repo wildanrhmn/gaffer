@@ -44,7 +44,8 @@ export const STYLE = /* css */ `
     --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;overflow-x:clip}
+  img,svg,video{max-width:100%}
   body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--sans);
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
@@ -141,11 +142,12 @@ export function footerHtml() {
   </div></footer>`;
 }
 
-// GSAP from CDN (all plugins free). gsap.from() keeps content visible if it fails to load.
+// GSAP served locally from the app (works offline). gsap.from() keeps content
+// visible even if the scripts somehow fail to load.
 export const GSAP_SCRIPTS = `
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>`;
+<script src="/vendor/gsap.min.js"></script>
+<script src="/vendor/ScrollTrigger.min.js"></script>
+<script src="/vendor/SplitText.min.js"></script>`;
 
 /** Build a full HTML document. `style` is page-specific CSS appended to the shared sheet. */
 export function doc({ title, body, script = '', style = '', gsap = false }) {

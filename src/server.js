@@ -8,6 +8,7 @@
 // Open http://localhost:4600
 
 import http from 'node:http';
+import { readFileSync } from 'node:fs';
 import { verifyModels, MODELS, MODEL_TYPES, TTS_SAMPLE_RATE } from './qvac/models.js';
 import { loadLLM, synthesizeSpeech } from './qvac/runtime.js';
 import { wavBuffer } from './wav.js';
@@ -51,9 +52,35 @@ function readJson(req) {
   });
 }
 
+// Locally-served GSAP (vendored from node_modules so the site animates offline).
+const VENDOR = {
+  '/vendor/gsap.min.js': 'gsap.min.js',
+  '/vendor/ScrollTrigger.min.js': 'ScrollTrigger.min.js',
+  '/vendor/SplitText.min.js': 'SplitText.min.js',
+};
+const _vendorCache = {};
+function vendorFile(name) {
+  if (!_vendorCache[name]) {
+    _vendorCache[name] = readFileSync(new URL('../node_modules/gsap/dist/' + name, import.meta.url));
+  }
+  return _vendorCache[name];
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const p = url.pathname;
+
+  // --- vendored JS (GSAP) ---
+  if (VENDOR[p]) {
+    try {
+      res.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=31536000' });
+      res.end(vendorFile(VENDOR[p]));
+    } catch {
+      res.writeHead(404);
+      res.end('not found');
+    }
+    return;
+  }
 
   // --- pages ---
   if (p === '/') return html(res, LANDING);
