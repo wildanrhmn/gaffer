@@ -44,7 +44,7 @@ const OPTIONS = MARKS.map((m) => `
   </button>`).join('');
 
 const BODY = `
-${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#features', label: 'Features' }], cta: { label: 'Open the app', href: '/app' } })}
+${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#features', label: 'Features' }], cta: { label: 'Launch App', href: '/app' } })}
 
 <main class="wrap">
   <section class="lhead">

@@ -114,7 +114,7 @@ export const STYLE = /* css */ `
 `;
 
 // --- Header / footer HTML ----------------------------------------------------------
-export function headerHtml({ cta = { label: 'Open the app', href: '/app' }, links = [] } = {}) {
+export function headerHtml({ cta = { label: 'Launch App', href: '/app' }, links = [] } = {}) {
   const linkHtml = links.map((l) => `<a href="${l.href}">${l.label}</a>`).join('');
   return `<header class="hdr" id="hdr">
     <div class="pill">
@@ -136,7 +136,7 @@ export function footerHtml() {
       <a href="/">Home</a>
       <a href="/#how">How it works</a>
       <a href="/#features">Features</a>
-      <a href="/app">Open the app</a>
+      <a href="/app">Launch App</a>
     </div>
   </div></footer>`;
 }

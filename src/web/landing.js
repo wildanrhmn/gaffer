@@ -32,11 +32,13 @@ const CSS = `
   .sline{overflow:hidden;padding-bottom:.06em}
 
   /* HOW IT WORKS — pinned card deck */
-  .how-head{margin:0 0 8px}
+  .how-head{margin:0 0 30px}
   .how-head h2{font-size:clamp(30px,5vw,56px);letter-spacing:-.03em;margin:0;font-weight:550}
   .how-head h2 em{font-style:normal;color:var(--life)}
-  .how-stage{position:relative;padding:20px 0 60px}
-  .how-stage.pinned{height:100vh;padding:0;display:grid;place-items:center}
+  .how-stage{position:relative}
+  .how-stage.pinned{height:100vh;display:grid;place-items:center}
+  .how-inner{width:100%}
+  .how-inner .eyebrow{margin-bottom:26px}
   .how-deck{display:grid;grid-template-columns:1fr;gap:16px;width:100%}
   @media(min-width:860px){.how-deck{grid-template-columns:repeat(3,1fr)}}
   .how-deck.stacked{display:block;position:relative;width:min(720px,92vw);height:380px;margin:0 auto}
@@ -58,29 +60,29 @@ const CSS = `
   .whytext .wd{display:inline-block;will-change:filter,color,opacity}
 
   /* WHAT YOU GET — bento (staggered reveal) */
-  .bento{display:grid;grid-template-columns:1fr;gap:16px}
-  @media(min-width:780px){.bento{grid-template-columns:repeat(6,1fr)}.s3{grid-column:span 3}.s2{grid-column:span 2}}
-  .fc{background:oklch(0.115 0 0);border:1px solid oklch(0.20 0 0);border-radius:18px;padding:28px;grid-column:span 6;display:flex;flex-direction:column;transition:border-color .2s}
+  .bento{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:780px){.bento{grid-template-columns:repeat(6,1fr)}.bento .s3{grid-column:span 3}.bento .s2{grid-column:span 2}}
+  .fc{background:oklch(0.115 0 0);border:1px solid oklch(0.20 0 0);border-radius:16px;padding:22px 24px;grid-column:span 6;display:flex;flex-direction:column;transition:border-color .2s}
   .fc:hover{border-color:oklch(0.28 0 0)}
-  .fc .fe{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-fg);display:flex;align-items:center;gap:8px}
+  .fc .fe{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-fg);display:flex;align-items:center;gap:8px}
   .fc .fe .d{width:5px;height:5px;border-radius:50%;background:var(--life)}
-  .fc h3{margin:16px 0 9px;font-size:21px;font-weight:550;letter-spacing:-.015em}
-  .fc p{margin:0;color:var(--muted-fg);font-size:15px;line-height:1.65}
+  .fc h3{margin:11px 0 6px;font-size:19px;font-weight:550;letter-spacing:-.015em}
+  .fc p{margin:0;color:var(--muted-fg);font-size:14.5px;line-height:1.55}
 
-  .faq{max-width:820px}
+  .faq{max-width:none}
   .fitem{border-bottom:1px solid var(--border-soft)}
   .fq{width:100%;text-align:left;background:none;border:0;color:var(--fg);font:inherit;font-size:17px;font-weight:500;
     padding:24px 4px;display:flex;justify-content:space-between;align-items:center;gap:14px;cursor:pointer}
   .fq .ic{color:var(--muted-fg);transition:transform .2s,color .2s;flex:0 0 auto}
   .fitem.open .fq .ic{transform:rotate(45deg);color:var(--life)}
   .fa{max-height:0;overflow:hidden;transition:max-height .28s ease}
-  .fa .inner{padding:0 4px 26px;color:var(--muted-fg);font-size:15.5px;line-height:1.7;max-width:700px}
+  .fa .inner{padding:0 4px 26px;color:var(--muted-fg);font-size:15.5px;line-height:1.7;max-width:none}
 
   /* CLOSING — glowing panel */
   .closing{padding:40px 0 30px}
   .closing-card{position:relative;overflow:hidden;border:1px solid oklch(0.26 0 0);border-radius:30px;
     background:radial-gradient(120% 130% at 50% -10%, oklch(0.74 0.18 162 / .16), transparent 60%), oklch(0.12 0 0);
-    padding:clamp(56px,9vw,110px) 28px;text-align:center}
+    padding:clamp(74px,11vw,136px) clamp(40px,7vw,96px);text-align:center}
   .closing-card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
     background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0);background-size:30px 30px}
   .closing-card h2{position:relative;font-size:clamp(38px,7vw,80px);letter-spacing:-.04em;margin:0;font-weight:550;line-height:1}
@@ -102,23 +104,25 @@ ${headerHtml({ links: [
     <h1>Your assistant coach, <em>on the touchline.</em></h1>
     <p class="say-lede">You already talk through every match. Gaffer listens, keeps track of what's really happening on the pitch, and hands you three clear changes to make at half-time. It runs on your own phone, even where there's no signal.</p>
     <div class="herocta">
-      <a class="btn pri lg" href="/app">Open the app →</a>
+      <a class="btn pri lg" href="/app">Launch App →</a>
       <a class="btn subtle lg" href="/#how">See how it works</a>
     </div>
   </section>
 
   <section id="how">
-    <div class="eyebrow" data-reveal><span class="sq"></span><span class="lbl">How it works</span><span class="dots"></span></div>
-    <div class="how-head" data-reveal><h2>Coach like you always do. <em>Gaffer does the rest.</em></h2></div>
     <div class="how-stage" id="howStage">
-      <div class="how-deck" id="howDeck">
-        <div class="steps" id="steps"><b>01</b><b>02</b><b>03</b></div>
-        ${HOW_CARDS.map((c) => `
+      <div class="how-inner">
+        <div class="eyebrow"><span class="sq"></span><span class="lbl">How it works</span><span class="dots"></span></div>
+        <div class="how-head"><h2>Coach like you always do. <em>Gaffer does the rest.</em></h2></div>
+        <div class="how-deck" id="howDeck">
+          <div class="steps" id="steps"><b>01</b><b>02</b><b>03</b></div>
+          ${HOW_CARDS.map((c) => `
         <div class="hcard">
           <div class="row"><div class="ico">${c.ic}</div><div class="idx">${c.n}</div></div>
           <h3>${c.h}</h3>
           <p>${c.p}</p>
         </div>`).join('')}
+        </div>
       </div>
     </div>
   </section>
@@ -150,7 +154,7 @@ ${headerHtml({ links: [
     <div class="closing-card" data-reveal>
       <h2>Ready to coach with <em>a plan</em>?</h2>
       <p>Free, private, and running on the phone already in your pocket.</p>
-      <div class="herocta"><a class="btn pri lg" href="/app">Open the app →</a></div>
+      <div class="herocta"><a class="btn pri lg" href="/app">Launch App →</a></div>
     </div>
   </section>
 </main>
@@ -230,7 +234,7 @@ function animate(){
     g.set(cards,{opacity:0,yPercent:26,scale:.9,filter:'blur(6px)'});
     g.set(cards[0],{opacity:1,yPercent:0,scale:1,filter:'blur(0px)'});
     steps[0].classList.add('on');
-    const tl=g.timeline({scrollTrigger:{trigger:stage,start:'top top',end:'+='+(cards.length*560),pin:true,scrub:.5,
+    const tl=g.timeline({scrollTrigger:{trigger:stage,start:'top top',end:'+='+(cards.length*430),pin:true,scrub:.5,
       onUpdate:(self)=>{ const i=Math.round(self.progress*(cards.length-1)); steps.forEach((s,k)=>s.classList.toggle('on',k<=i)); }}});
     for(let i=1;i<cards.length;i++){
       tl.to(cards[i-1],{yPercent:-26,scale:.86,opacity:0,filter:'blur(10px)',ease:'none'},i-1)
