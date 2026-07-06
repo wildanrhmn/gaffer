@@ -13,6 +13,8 @@ import { runMatch } from './matchRunner.js';
 import { loadLLM, synthesizeSpeech } from './qvac/runtime.js';
 import { wavBuffer } from './wav.js';
 import { translateText, SUPPORTED_LANGS } from './translate.js';
+import { tagUtterance } from './tagger.js';
+import { demoMatch } from './fixtures/demo-match.js';
 import { PAGE } from './web/page.js';
 
 const PORT = Number(process.env.PORT || 4600);
@@ -31,7 +33,37 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/config') {
     res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ delegated: Boolean(providerKey), providerKey, langs: SUPPORTED_LANGS }));
+    res.end(JSON.stringify({
+      delegated: Boolean(providerKey),
+      providerKey,
+      langs: SUPPORTED_LANGS,
+      team: demoMatch.team,
+      opponent: demoMatch.opponent,
+      roster: demoMatch.roster,
+    }));
+    return;
+  }
+
+  // Live single-remark tagging — the "type your own touchline remark" widget.
+  if (url.pathname === '/api/tag') {
+    const text = (url.searchParams.get('text') || '').slice(0, 400).trim();
+    if (!text) {
+      res.writeHead(400, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'empty remark' }));
+      return;
+    }
+    try {
+      const tags = await tagUtterance({ text }, demoMatch.roster);
+      const players = tags.players.map((n) => ({
+        n,
+        name: demoMatch.roster.find((p) => p.number === n)?.name ?? '',
+      }));
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ players, phase: tags.phase, themes: tags.themes, sentiment: tags.sentiment ?? 0 }));
+    } catch (err) {
+      res.writeHead(500, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
     return;
   }
 
