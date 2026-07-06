@@ -38,23 +38,24 @@ const CSS = `
   .how-stage{position:relative}
   .how-stage.pinned{height:100vh;display:grid;place-items:center}
   .how-inner{width:100%}
-  .how-inner .eyebrow{margin-bottom:26px}
+  .how-inner .eyebrow{margin-bottom:34px}
   .how-deck{display:grid;grid-template-columns:1fr;gap:16px;width:100%}
   @media(min-width:860px){.how-deck{grid-template-columns:repeat(3,1fr)}}
-  .how-deck.stacked{display:block;position:relative;width:min(720px,92vw);height:380px;margin:0 auto}
+  .how-deck.stacked{display:block;position:relative;width:min(940px,95vw);height:460px;margin:0 auto}
   .how-deck.stacked .hcard{position:absolute;top:0;left:0;width:100%}
-  .steps{position:absolute;top:-42px;right:0;display:flex;gap:12px;font-family:var(--mono);font-size:12px;color:var(--faint);z-index:2}
+  .steps{position:absolute;top:-44px;right:0;display:flex;gap:12px;font-family:var(--mono);font-size:12px;color:var(--faint);z-index:2}
   .steps b{color:var(--muted-fg);font-weight:400;transition:color .3s}
   .steps b.on{color:var(--life)}
-  .hcard{background:oklch(0.12 0 0);border:1px solid oklch(0.24 0 0);border-radius:24px;padding:40px;display:flex;flex-direction:column;min-height:360px;box-shadow:0 30px 90px -40px rgba(0,0,0,.85)}
+  .hcard{background:oklch(0.12 0 0);border:1px solid oklch(0.24 0 0);border-radius:26px;padding:clamp(40px,5vw,60px);display:flex;flex-direction:column;min-height:440px;box-shadow:0 30px 90px -40px rgba(0,0,0,.85)}
   .hcard .row{display:flex;align-items:center;justify-content:space-between}
-  .hcard .ico{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;border:1px solid oklch(0.28 0 0);background:oklch(0.16 0 0);color:var(--life)}
-  .hcard .idx{font-family:var(--mono);font-size:clamp(46px,7vw,96px);font-weight:400;color:oklch(0.26 0 0);letter-spacing:-.04em;line-height:1}
-  .hcard h3{margin:30px 0 14px;font-size:clamp(26px,3.4vw,38px);font-weight:550;letter-spacing:-.02em}
-  .hcard p{margin:0;color:var(--muted-fg);font-size:17px;line-height:1.6;max-width:54ch}
+  .hcard .ico{width:60px;height:60px;border-radius:16px;display:grid;place-items:center;border:1px solid oklch(0.28 0 0);background:oklch(0.16 0 0);color:var(--life)}
+  .hcard .ico svg{width:28px;height:28px}
+  .hcard .idx{font-family:var(--mono);font-size:clamp(56px,8.5vw,120px);font-weight:400;color:oklch(0.26 0 0);letter-spacing:-.04em;line-height:1}
+  .hcard h3{margin:auto 0 16px;font-size:clamp(28px,3.9vw,46px);font-weight:550;letter-spacing:-.02em}
+  .hcard p{margin:0;color:var(--muted-fg);font-size:clamp(17px,1.5vw,20px);line-height:1.55;max-width:60ch}
 
   /* WHY IT MATTERS — pinned full-screen word reveal */
-  .why-sec{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 0}
+  .why-sec{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:30px 0}
   .whytext{font-size:clamp(34px,6.4vw,88px);line-height:1.16;color:var(--fg);margin:22px 0 0;max-width:1100px;letter-spacing:-.025em;font-weight:550}
   .whytext em{color:var(--life);font-style:normal}
   .whytext .wd{display:inline-block;will-change:filter,color,opacity}
@@ -79,10 +80,10 @@ const CSS = `
   .fa .inner{padding:0 4px 26px;color:var(--muted-fg);font-size:15.5px;line-height:1.7;max-width:none}
 
   /* CLOSING — glowing panel */
-  .closing{padding:40px 0 30px}
-  .closing-card{position:relative;overflow:hidden;border:1px solid oklch(0.26 0 0);border-radius:30px;
+  .closing{width:100vw;margin:44px calc(50% - 50vw) 30px;padding:0 clamp(24px,4vw,64px)}
+  .closing-card{position:relative;overflow:hidden;max-width:1280px;margin:0 auto;border:1px solid oklch(0.26 0 0);border-radius:30px;
     background:radial-gradient(120% 130% at 50% -10%, oklch(0.74 0.18 162 / .16), transparent 60%), oklch(0.12 0 0);
-    padding:clamp(74px,11vw,136px) clamp(40px,7vw,96px);text-align:center}
+    padding:clamp(74px,11vw,140px) clamp(40px,8vw,120px);text-align:center}
   .closing-card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
     background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0);background-size:30px 30px}
   .closing-card h2{position:relative;font-size:clamp(38px,7vw,80px);letter-spacing:-.04em;margin:0;font-weight:550;line-height:1}
@@ -113,7 +114,6 @@ ${headerHtml({ links: [
     <div class="how-stage" id="howStage">
       <div class="how-inner">
         <div class="eyebrow"><span class="sq"></span><span class="lbl">How it works</span><span class="dots"></span></div>
-        <div class="how-head"><h2>Coach like you always do. <em>Gaffer does the rest.</em></h2></div>
         <div class="how-deck" id="howDeck">
           <div class="steps" id="steps"><b>01</b><b>02</b><b>03</b></div>
           ${HOW_CARDS.map((c) => `
