@@ -126,6 +126,18 @@ const CSS = `
   .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}
   select{background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font:inherit;font-size:13px}
   #tstat{font-size:13px}
+
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px}
+  .modal[hidden]{display:none}
+  .modal-ov{position:absolute;inset:0;background:rgba(4,6,5,.62);backdrop-filter:blur(4px);opacity:0;transition:opacity .22s ease}
+  .modal-box{position:relative;width:min(440px,100%);background:oklch(0.12 0 0);border:1px solid var(--border);border-radius:20px;padding:28px 28px 22px;box-shadow:0 40px 110px -30px rgba(0,0,0,.92);opacity:0;transform:translateY(14px) scale(.94);transition:opacity .24s ease,transform .24s cubic-bezier(.2,.9,.3,1.2)}
+  .modal.show .modal-ov{opacity:1}
+  .modal.show .modal-box{opacity:1;transform:none}
+  .modal-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:oklch(0.20 0.05 25);color:var(--danger);margin-bottom:16px}
+  .modal-t{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
+  .modal-m{margin:11px 0 0;color:var(--muted-fg);font-size:14.5px;line-height:1.6}
+  .modal-acts{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
 `;
 
 const BODY = `
@@ -205,6 +217,19 @@ ${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#feat
   </div>
 </main>
 
+<div class="modal" id="modal" hidden>
+  <div class="modal-ov" id="modalOv"></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalT">
+    <div class="modal-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.4 2.6L3 8"/><path d="M3 3v5h5"/></svg></div>
+    <h3 class="modal-t" id="modalT">Start a new match?</h3>
+    <p class="modal-m">This clears the current notes and player ratings. Your squad and formation stay saved.</p>
+    <div class="modal-acts">
+      <button class="sec-btn" id="modalCancel">Cancel</button>
+      <button class="btn pri" id="modalOk">Start new match</button>
+    </div>
+  </div>
+</div>
+
 ${footerHtml()}
 `;
 
@@ -238,12 +263,13 @@ const FORMATIONS={
   "3-4-3":[[8,50],[24,30],[24,50],[24,70],[50,18],[50,40],[50,60],[50,82],[77,22],[77,50],[77,78]],
 };
 function applyFormation(name){ const s=FORMATIONS[name]; if(!s) return; draft.forEach((p,i)=>{ if(s[i]){ p.x=s[i][0]; p.y=s[i][1]; } }); renderPitch(); }
-/* kitted-player silhouette with the shirt number on the chest */
-function figSvg(n){ const g="k"+n; return '<svg class="figsvg" viewBox="0 0 44 52" xmlns="http://www.w3.org/2000/svg">'
-  +'<defs><linearGradient id="'+g+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ddc61"/><stop offset="1" stop-color="#199536"/></linearGradient></defs>'
-  +'<circle cx="22" cy="9" r="6.2" fill="#2f7a41" stroke="rgba(255,255,255,.55)" stroke-width="0.9"/>'
-  +'<path d="M14.5 16.5 L8 19.5 L2.8 26.5 L8 30.5 L12 27.5 L12 46 L32 46 L32 27.5 L36 30.5 L41.2 26.5 L36 19.5 L29.5 16.5 C27 20.5 17 20.5 14.5 16.5 Z" fill="url(#'+g+')" stroke="rgba(255,255,255,.55)" stroke-width="0.9" stroke-linejoin="round"/>'
-  +'<text x="22" y="36" text-anchor="middle" font-family="ui-monospace,monospace" font-weight="700" font-size="12.5" fill="#04120a">'+n+'</text></svg>'; }
+/* clean gray kitted-player silhouette with the shirt number on the chest */
+function figSvg(n){ const g="k"+n; return '<svg class="figsvg" viewBox="0 0 48 56" xmlns="http://www.w3.org/2000/svg">'
+  +'<defs><linearGradient id="'+g+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7dbe0"/><stop offset="1" stop-color="#969ba3"/></linearGradient></defs>'
+  +'<ellipse cx="24" cy="52.5" rx="10.5" ry="2.4" fill="rgba(0,0,0,.32)"/>'
+  +'<circle cx="24" cy="9" r="6.3" fill="#c2c7cd" stroke="rgba(0,0,0,.22)" stroke-width="0.7"/>'
+  +'<path d="M17 15.5 C19 18.2 29 18.2 31 15.5 L39 18 L43 26.5 L36.4 30 L33 26.7 L33 48 L15 48 L15 26.7 L11.6 30 L5 26.5 L9 18 Z" fill="url(#'+g+')" stroke="rgba(0,0,0,.22)" stroke-width="0.7" stroke-linejoin="round"/>'
+  +'<text x="24" y="37" text-anchor="middle" font-family="ui-monospace,monospace" font-weight="700" font-size="13" fill="#242830">'+n+'</text></svg>'; }
 /* live match rating from your own notes: 6.5 base, praise up, concern down */
 function ratingFor(n){ if(!match) return null; const ns=match.utterances.filter(u=>(u.players||[]).some(p=>p.n===n)); if(!ns.length) return null; let r=6.5; ns.forEach(u=>{ r+=(u.sentiment||0)*0.5; }); return Math.max(3.5,Math.min(9.9,r)); }
 function updateRatings(){ if(mode!=="match") return; $("#tokens").querySelectorAll(".tok").forEach(t=>{ const n=+t.dataset.num, r=ratingFor(n); let b=t.querySelector(".rbadge"); if(r!=null){ if(!b){ b=document.createElement("div"); b.className="rbadge"; t.querySelector(".fig").appendChild(b); } b.textContent=r.toFixed(1); b.className="rbadge "+(r>=7?"hi":r>=5.5?"mid":"lo"); } else if(b){ b.remove(); } }); }
@@ -309,7 +335,12 @@ function renderMatch(){
 $("#oppInput").addEventListener("input",()=>{ match.opponent=$("#oppInput").value.trim(); saveMatch(); });
 $("#halfSeg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; match.half=+b.dataset.h; saveMatch(); renderMatch(); });
 $("#editTeam").onclick=openSetup;
-$("#newMatch").onclick=()=>{ if(!confirm("Start a new match? This clears the notes (your squad is kept).")) return; match={half:1,opponent:"",utterances:[]}; lastText=""; $("#analysis").innerHTML=""; $("#anaBadge").textContent=""; saveMatch(); renderMatch(); };
+function openModal(){ const m=$("#modal"); m.hidden=false; requestAnimationFrame(()=>m.classList.add("show")); }
+function closeModal(){ const m=$("#modal"); m.classList.remove("show"); setTimeout(()=>{ m.hidden=true; },250); }
+$("#newMatch").onclick=openModal;
+$("#modalCancel").onclick=closeModal; $("#modalOv").onclick=closeModal;
+addEventListener("keydown",e=>{ if(e.key==="Escape"&&!$("#modal").hidden) closeModal(); });
+$("#modalOk").onclick=()=>{ closeModal(); match={half:1,opponent:"",utterances:[]}; lastText=""; $("#analysis").innerHTML=""; $("#anaBadge").textContent=""; saveMatch(); renderMatch(); };
 
 function renderFeed(){
   const f=$("#feed");
