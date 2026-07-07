@@ -69,6 +69,12 @@ const CSS = `
   .pitch-wrap:not(.locked) .tok:hover .x{display:grid}
   .tok.hl .jer{animation:hl 1.6s ease}
   @keyframes hl{0%{box-shadow:0 0 0 0 rgba(61,220,97,.75)}70%{box-shadow:0 0 0 16px rgba(61,220,97,0)}100%{box-shadow:0 0 0 0 rgba(61,220,97,0)}}
+  .cbadge{position:absolute;top:-8px;left:-8px;min-width:19px;height:19px;padding:0 4px;border-radius:10px;background:#0b1b10;border:1px solid oklch(0.5 0.13 162);color:var(--life);font-family:var(--mono);font-size:11px;line-height:1;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+
+  .fpresets{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:18px}
+  .fplabel{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-right:2px}
+  .fchip{background:var(--bg);border:1px solid var(--border);color:var(--muted-fg);font:inherit;font-size:13px;font-weight:500;padding:7px 13px;border-radius:999px;cursor:pointer;transition:border-color .15s,color .15s}
+  .fchip:hover{border-color:var(--life);color:var(--fg)}
 
   /* setup controls */
   .setup-row{display:grid;grid-template-columns:minmax(0,260px) 1fr;gap:18px;align-items:end;margin-top:24px}
@@ -157,7 +163,8 @@ ${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#feat
         </div>
       </div>
     </div>
-    <div class="kbdhint">Number, name, Enter for the next. Drag them on the pitch to set your shape.</div>
+    <div class="fpresets" id="fpresets"><span class="fplabel">Quick formation</span><button class="fchip" data-f="4-4-2">4-4-2</button><button class="fchip" data-f="4-3-3">4-3-3</button><button class="fchip" data-f="4-2-3-1">4-2-3-1</button><button class="fchip" data-f="3-5-2">3-5-2</button><button class="fchip" data-f="3-4-3">3-4-3</button></div>
+    <div class="kbdhint">Number, name, Enter for the next. Tap a formation or drag players on the pitch to set your shape.</div>
     <div class="setup-actions">
       <button class="btn pri lg" id="startMatch" disabled>Start a match →</button>
       <span class="muted" id="setupHint" style="font-size:13px"></span>
@@ -219,6 +226,17 @@ const SLOTS=[[8,50],[24,20],[24,40],[24,60],[24,80],[50,26],[50,50],[50,74],[76,
 function slotFor(i){ return SLOTS[i]||[38+((i*17)%40),44+((i*13)%12)]; }
 function role(x,y){ if(x<=15) return "GK"; const s=y<34?"R":y>66?"L":"C"; if(x<=40) return s==="C"?"CB":s+"B"; if(x<=64) return s+"M"; return s==="C"?"ST":s+"W"; }
 function pitchPlayers(){ return mode==="setup"?draft:(team?team.roster:[]); }
+const FORMATIONS={
+  "4-4-2":[[8,50],[24,18],[24,40],[24,60],[24,82],[50,18],[50,40],[50,60],[50,82],[77,38],[77,62]],
+  "4-3-3":[[8,50],[24,18],[24,40],[24,60],[24,82],[48,28],[48,50],[48,72],[77,22],[77,50],[77,78]],
+  "4-2-3-1":[[8,50],[24,18],[24,40],[24,60],[24,82],[42,38],[42,62],[62,22],[62,50],[62,78],[80,50]],
+  "3-5-2":[[8,50],[24,30],[24,50],[24,70],[48,14],[48,34],[48,50],[48,66],[48,86],[77,38],[77,62]],
+  "3-4-3":[[8,50],[24,30],[24,50],[24,70],[50,18],[50,40],[50,60],[50,82],[77,22],[77,50],[77,78]],
+};
+function applyFormation(name){ const s=FORMATIONS[name]; if(!s) return; draft.forEach((p,i)=>{ if(s[i]){ p.x=s[i][0]; p.y=s[i][1]; } }); renderPitch(); }
+/* how many notes reference each player, this match */
+function noteCounts(){ const m={}; (match?match.utterances:[]).forEach(u=>(u.players||[]).forEach(p=>{ m[p.n]=(m[p.n]||0)+1; })); return m; }
+function updateCounts(){ if(mode!=="match") return; const c=noteCounts(); $("#tokens").querySelectorAll(".tok").forEach(t=>{ const n=+t.dataset.num, v=c[n]||0; let b=t.querySelector(".cbadge"); if(v>0){ if(!b){ b=document.createElement("div"); b.className="cbadge"; t.appendChild(b); } b.textContent=v; } else if(b){ b.remove(); } }); }
 
 function show(view){
   mode=view;
@@ -264,6 +282,7 @@ function addPlayer(){
   $("#pNum").value=""; $("#pName").value=""; $("#setupHint").textContent=""; $("#pNum").focus(); renderPitch();
 }
 $("#pAdd").onclick=addPlayer;
+$("#fpresets").addEventListener("click",e=>{ const b=e.target.closest("[data-f]"); if(b) applyFormation(b.dataset.f); });
 $("#pNum").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#pName").focus(); }});
 $("#pName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addPlayer(); }});
 $("#tokens").addEventListener("click",e=>{ const b=e.target.closest("[data-x]"); if(b&&mode==="setup"){ draft.splice(+b.dataset.x,1); renderPitch(); }});
@@ -275,7 +294,7 @@ function rosterForApi(){ return team.roster.map(p=>({number:p.number,name:p.name
 function renderMatch(){
   $("#teamLbl").textContent=team.name; $("#oppInput").value=match.opponent||"";
   $("#halfSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.h===match.half));
-  renderPitch(); renderFeed();
+  renderPitch(); renderFeed(); updateCounts();
 }
 $("#oppInput").addEventListener("input",()=>{ match.opponent=$("#oppInput").value.trim(); saveMatch(); });
 $("#halfSeg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; match.half=+b.dataset.h; saveMatch(); renderMatch(); });
@@ -295,11 +314,11 @@ function renderFeed(){
   $("#count").textContent=match.utterances.length?("· "+match.utterances.length+" note"+(match.utterances.length>1?"s":"")):"";
   const ready=match.utterances.length>=1; $("#getplan").disabled=!ready; $("#getreport").disabled=!ready; $("#anaHint").style.display=ready?"none":"block";
 }
-$("#feed").addEventListener("click",e=>{ const b=e.target.closest("[data-del]"); if(b){ match.utterances.splice(+b.dataset.del,1); saveMatch(); renderFeed(); }});
+$("#feed").addEventListener("click",e=>{ const b=e.target.closest("[data-del]"); if(b){ match.utterances.splice(+b.dataset.del,1); saveMatch(); renderFeed(); updateCounts(); }});
 
 function curMin(){ return Math.max(0,Math.min(120,parseInt($("#min").value||"1",10))); }
 function bumpMin(){ $("#min").value=Math.min(120,curMin()+2); }
-function addNote(u){ match.utterances.push(u); saveMatch(); renderFeed(); bumpMin(); highlight((u.players||[]).map(p=>p.n)); }
+function addNote(u){ match.utterances.push(u); saveMatch(); renderFeed(); bumpMin(); highlight((u.players||[]).map(p=>p.n)); updateCounts(); }
 function capMsg(html,spin){ $("#capmsg").innerHTML=(spin?'<span class="spin"></span>':"")+(html||""); }
 
 /* voice capture (tap-to-talk → on-device Whisper) */
