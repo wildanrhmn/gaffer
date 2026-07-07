@@ -107,7 +107,7 @@ ${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#feat
   <section id="setup" hidden>
     <div class="eyebrow"><span class="sq"></span><span class="lbl">Your squad</span><span class="dots"></span></div>
     <h1 class="apptitle">Build your <em>squad</em>.</h1>
-    <p class="sub">Do this once — it's saved on your device and ready every match. Add a few players to start and the rest whenever. During games you never type; you just tap the mic and talk.</p>
+    <p class="sub">Do this once. It's saved on your device and ready every match. Add a few players to start and the rest whenever. During games you never type; you just tap the mic and talk.</p>
 
     <div class="card" style="margin-top:28px">
       <div class="bd">
@@ -124,7 +124,6 @@ ${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#feat
 
         <div class="setup-actions">
           <button class="btn pri lg" id="startMatch" disabled>Start a match →</button>
-          <button class="link" id="sampleBtn">Load a sample squad</button>
           <span class="muted" id="setupHint" style="font-size:13px"></span>
         </div>
       </div>
@@ -183,7 +182,7 @@ const $=(s)=>document.querySelector(s);
 const enc=encodeURIComponent;
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function mmss(ms){const t=Math.floor(ms/1000);return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");}
-const TEAM_KEY="gaffer:team:v2", MATCH_KEY="gaffer:match:v2";
+const TEAM_KEY="gaffer:team:v3", MATCH_KEY="gaffer:match:v3";
 const LNAME={es:"Español",pt:"Português",fr:"Français",de:"Deutsch",it:"Italiano"};
 
 let delegated=false, langs=[];
@@ -220,7 +219,6 @@ $("#pAdd").onclick=addPlayer;
 $("#pNum").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#pName").focus(); }});
 $("#pName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addPlayer(); }});
 $("#players").addEventListener("click",e=>{ const b=e.target.closest("[data-i]"); if(b){ draft.splice(+b.dataset.i,1); renderPlayers(); }});
-$("#sampleBtn").onclick=()=>{ $("#teamName").value="Riverside U-14"; draft=[[1,"Amara"],[2,"Priya"],[4,"Sofia"],[5,"Chloe"],[3,"Isla"],[6,"Nadia"],[8,"Grace"],[10,"Mei"],[7,"Zara"],[11,"Leah"],[9,"Fatima"]].map(([n,nm])=>({number:n,name:nm})); renderPlayers(); };
 $("#startMatch").onclick=()=>{ team={name:$("#teamName").value.trim()||"My team",roster:draft.map(p=>({...p}))}; save(TEAM_KEY,team); if(!match) match={half:1,opponent:"",utterances:[]}; saveMatch(); show("match"); };
 
 /* ---------- MATCH ---------- */
