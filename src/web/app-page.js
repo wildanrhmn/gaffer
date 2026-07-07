@@ -61,15 +61,19 @@ const CSS = `
   .tok{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;user-select:none;-webkit-user-select:none;animation:pop .18s ease}
   @keyframes pop{from{opacity:0;transform:translate(-50%,-50%) scale(.7)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
   .pitch-wrap:not(.locked) .tok{cursor:grab;touch-action:none}
-  .tok.drag{cursor:grabbing;z-index:6}.tok.drag .jer{transform:scale(1.1)}
-  .tok .jer{width:46px;height:46px;border-radius:50%;background:linear-gradient(180deg,#3ddc61,#1a8f37);color:#04120a;font-family:var(--mono);font-weight:600;font-size:17px;display:grid;place-items:center;border:2px solid rgba(255,255,255,.9);box-shadow:0 5px 14px rgba(0,0,0,.55);transition:transform .12s}
-  @media(max-width:600px){.tok .jer{width:38px;height:38px;font-size:14px}}
-  .tok .lab{font-size:11px;color:#fff;background:rgba(0,0,0,.58);padding:1px 7px;border-radius:6px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
-  .tok .x{position:absolute;top:-7px;right:-7px;width:19px;height:19px;border-radius:50%;background:#2a1414;color:#ffb0b0;border:1px solid #5a2b2b;font-size:12px;line-height:1;cursor:pointer;display:none;place-items:center;padding:0}
+  .tok.drag{cursor:grabbing;z-index:6}.tok.drag .fig{transform:scale(1.12)}
+  .fig{position:relative;width:48px;height:54px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55));transition:transform .12s}
+  @media(max-width:600px){.fig{width:39px;height:44px}}
+  .figsvg{width:100%;height:100%;display:block}
+  .tok .lab{font-size:11px;color:#fff;background:rgba(0,0,0,.58);padding:1px 7px;border-radius:6px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;margin-top:-2px}
+  .tok .x{position:absolute;top:-6px;right:-8px;width:19px;height:19px;border-radius:50%;background:#2a1414;color:#ffb0b0;border:1px solid #5a2b2b;font-size:12px;line-height:1;cursor:pointer;display:none;place-items:center;padding:0;z-index:2}
   .pitch-wrap:not(.locked) .tok:hover .x{display:grid}
-  .tok.hl .jer{animation:hl 1.6s ease}
-  @keyframes hl{0%{box-shadow:0 0 0 0 rgba(61,220,97,.75)}70%{box-shadow:0 0 0 16px rgba(61,220,97,0)}100%{box-shadow:0 0 0 0 rgba(61,220,97,0)}}
-  .cbadge{position:absolute;top:-8px;left:-8px;min-width:19px;height:19px;padding:0 4px;border-radius:10px;background:#0b1b10;border:1px solid oklch(0.5 0.13 162);color:var(--life);font-family:var(--mono);font-size:11px;line-height:1;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+  .tok.hl .fig{animation:hl 1.4s ease}
+  @keyframes hl{0%{filter:drop-shadow(0 0 0 rgba(61,220,97,.9))}30%{filter:drop-shadow(0 0 11px rgba(61,220,97,.95)) brightness(1.25)}100%{filter:drop-shadow(0 4px 8px rgba(0,0,0,.55))}}
+  .rbadge{position:absolute;top:-6px;right:-10px;min-width:23px;height:19px;padding:0 4px;border-radius:9px;font-family:var(--mono);font-size:11px;font-weight:600;display:grid;place-items:center;border:1px solid;box-shadow:0 2px 6px rgba(0,0,0,.55);z-index:2}
+  .rbadge.hi{background:#08160d;border-color:oklch(0.5 0.13 162);color:var(--life)}
+  .rbadge.mid{background:#171307;border-color:oklch(0.55 0.12 85);color:oklch(0.84 0.13 85)}
+  .rbadge.lo{background:#1c0d0d;border-color:oklch(0.5 0.16 25);color:oklch(0.76 0.17 25)}
 
   .fpresets{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:18px}
   .fplabel{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-right:2px}
@@ -234,9 +238,15 @@ const FORMATIONS={
   "3-4-3":[[8,50],[24,30],[24,50],[24,70],[50,18],[50,40],[50,60],[50,82],[77,22],[77,50],[77,78]],
 };
 function applyFormation(name){ const s=FORMATIONS[name]; if(!s) return; draft.forEach((p,i)=>{ if(s[i]){ p.x=s[i][0]; p.y=s[i][1]; } }); renderPitch(); }
-/* how many notes reference each player, this match */
-function noteCounts(){ const m={}; (match?match.utterances:[]).forEach(u=>(u.players||[]).forEach(p=>{ m[p.n]=(m[p.n]||0)+1; })); return m; }
-function updateCounts(){ if(mode!=="match") return; const c=noteCounts(); $("#tokens").querySelectorAll(".tok").forEach(t=>{ const n=+t.dataset.num, v=c[n]||0; let b=t.querySelector(".cbadge"); if(v>0){ if(!b){ b=document.createElement("div"); b.className="cbadge"; t.appendChild(b); } b.textContent=v; } else if(b){ b.remove(); } }); }
+/* kitted-player silhouette with the shirt number on the chest */
+function figSvg(n){ const g="k"+n; return '<svg class="figsvg" viewBox="0 0 44 52" xmlns="http://www.w3.org/2000/svg">'
+  +'<defs><linearGradient id="'+g+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ddc61"/><stop offset="1" stop-color="#199536"/></linearGradient></defs>'
+  +'<circle cx="22" cy="9" r="6.2" fill="#2f7a41" stroke="rgba(255,255,255,.55)" stroke-width="0.9"/>'
+  +'<path d="M14.5 16.5 L8 19.5 L2.8 26.5 L8 30.5 L12 27.5 L12 46 L32 46 L32 27.5 L36 30.5 L41.2 26.5 L36 19.5 L29.5 16.5 C27 20.5 17 20.5 14.5 16.5 Z" fill="url(#'+g+')" stroke="rgba(255,255,255,.55)" stroke-width="0.9" stroke-linejoin="round"/>'
+  +'<text x="22" y="36" text-anchor="middle" font-family="ui-monospace,monospace" font-weight="700" font-size="12.5" fill="#04120a">'+n+'</text></svg>'; }
+/* live match rating from your own notes: 6.5 base, praise up, concern down */
+function ratingFor(n){ if(!match) return null; const ns=match.utterances.filter(u=>(u.players||[]).some(p=>p.n===n)); if(!ns.length) return null; let r=6.5; ns.forEach(u=>{ r+=(u.sentiment||0)*0.5; }); return Math.max(3.5,Math.min(9.9,r)); }
+function updateRatings(){ if(mode!=="match") return; $("#tokens").querySelectorAll(".tok").forEach(t=>{ const n=+t.dataset.num, r=ratingFor(n); let b=t.querySelector(".rbadge"); if(r!=null){ if(!b){ b=document.createElement("div"); b.className="rbadge"; t.querySelector(".fig").appendChild(b); } b.textContent=r.toFixed(1); b.className="rbadge "+(r>=7?"hi":r>=5.5?"mid":"lo"); } else if(b){ b.remove(); } }); }
 
 function show(view){
   mode=view;
@@ -251,7 +261,7 @@ function boot(){ if(hasTeam()){ if(!match) match={half:1,opponent:"",utterances:
 /* ---------- PITCH (shared) ---------- */
 function renderPitch(){
   const editable=mode==="setup", players=pitchPlayers();
-  $("#tokens").innerHTML=players.map((p,i)=>'<div class="tok" data-i="'+i+'" data-num="'+p.number+'" style="left:'+p.x+'%;top:'+p.y+'%">'+(editable?'<button class="x" data-x="'+i+'" title="Remove">×</button>':"")+'<div class="jer">'+p.number+'</div><div class="lab">'+esc(p.name)+'</div></div>').join("");
+  $("#tokens").innerHTML=players.map((p,i)=>'<div class="tok" data-i="'+i+'" data-num="'+p.number+'" style="left:'+p.x+'%;top:'+p.y+'%">'+(editable?'<button class="x" data-x="'+i+'" title="Remove">×</button>':"")+'<div class="fig">'+figSvg(p.number)+'</div><div class="lab">'+esc(p.name)+'</div></div>').join("");
   if($("#pitchEmpty")) $("#pitchEmpty").style.display=players.length?"none":"block";
   if(editable){ if($("#squadCnt")) $("#squadCnt").textContent=players.length?("· "+players.length+" on the pitch"):""; if($("#startMatch")) $("#startMatch").disabled=players.length<1; bindDrag(); }
 }
@@ -294,7 +304,7 @@ function rosterForApi(){ return team.roster.map(p=>({number:p.number,name:p.name
 function renderMatch(){
   $("#teamLbl").textContent=team.name; $("#oppInput").value=match.opponent||"";
   $("#halfSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.h===match.half));
-  renderPitch(); renderFeed(); updateCounts();
+  renderPitch(); renderFeed(); updateRatings();
 }
 $("#oppInput").addEventListener("input",()=>{ match.opponent=$("#oppInput").value.trim(); saveMatch(); });
 $("#halfSeg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; match.half=+b.dataset.h; saveMatch(); renderMatch(); });
@@ -314,11 +324,11 @@ function renderFeed(){
   $("#count").textContent=match.utterances.length?("· "+match.utterances.length+" note"+(match.utterances.length>1?"s":"")):"";
   const ready=match.utterances.length>=1; $("#getplan").disabled=!ready; $("#getreport").disabled=!ready; $("#anaHint").style.display=ready?"none":"block";
 }
-$("#feed").addEventListener("click",e=>{ const b=e.target.closest("[data-del]"); if(b){ match.utterances.splice(+b.dataset.del,1); saveMatch(); renderFeed(); updateCounts(); }});
+$("#feed").addEventListener("click",e=>{ const b=e.target.closest("[data-del]"); if(b){ match.utterances.splice(+b.dataset.del,1); saveMatch(); renderFeed(); updateRatings(); }});
 
 function curMin(){ return Math.max(0,Math.min(120,parseInt($("#min").value||"1",10))); }
 function bumpMin(){ $("#min").value=Math.min(120,curMin()+2); }
-function addNote(u){ match.utterances.push(u); saveMatch(); renderFeed(); bumpMin(); highlight((u.players||[]).map(p=>p.n)); updateCounts(); }
+function addNote(u){ match.utterances.push(u); saveMatch(); renderFeed(); bumpMin(); highlight((u.players||[]).map(p=>p.n)); updateRatings(); }
 function capMsg(html,spin){ $("#capmsg").innerHTML=(spin?'<span class="spin"></span>':"")+(html||""); }
 
 /* voice capture (tap-to-talk → on-device Whisper) */
