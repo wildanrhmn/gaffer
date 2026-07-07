@@ -24,21 +24,24 @@ const CSS = `
   .muted{color:var(--muted-fg)}
   .hint{color:var(--muted-fg);font-size:13px;margin-top:12px}
 
-  /* setup — game-like squad */
-  .squad-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:24px}
-  .squad-head .cnt{font-family:var(--mono);font-size:12px;color:var(--faint)}
-  .qadd{display:grid;grid-template-columns:104px 1fr auto;gap:10px;align-items:end;margin-top:12px}
-  @media(max-width:520px){.qadd{grid-template-columns:80px 1fr auto}}
-  .kbdhint{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:9px}
-  .squad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;margin-top:16px}
-  .jersey{position:relative;background:linear-gradient(180deg,oklch(0.145 0 0),oklch(0.11 0 0));border:1px solid var(--border);border-radius:14px;padding:18px 12px 15px;text-align:center;overflow:hidden;animation:pop .2s ease}
-  @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
-  .jersey::before{content:"";position:absolute;inset:0 0 auto 0;height:34px;background:linear-gradient(180deg,oklch(0.74 0.18 162 / .10),transparent)}
-  .jersey .no{position:relative;font-family:var(--mono);font-size:34px;font-weight:500;color:var(--life);line-height:1;letter-spacing:-.02em}
-  .jersey .nm{margin-top:9px;font-size:14px;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .jersey .x{position:absolute;top:7px;right:8px;background:none;border:0;color:var(--faint);cursor:pointer;font-size:15px;line-height:1;opacity:0;transition:opacity .15s}
-  .jersey:hover .x{opacity:1}.jersey .x:hover{color:var(--danger)}
-  .squad-empty{grid-column:1/-1;color:var(--muted-fg);padding:26px 4px;text-align:center;font-size:14px;border:1px dashed var(--border-soft);border-radius:14px}
+  /* setup — interactive pitch */
+  .setup-wrap{display:grid;grid-template-columns:minmax(280px,400px) 1fr;gap:32px;margin-top:26px;align-items:start}
+  @media(max-width:820px){.setup-wrap{grid-template-columns:1fr;gap:22px}}
+  .pitch-wrap{position:relative;width:100%;max-width:420px;aspect-ratio:2/3;border-radius:16px;overflow:hidden;border:1px solid var(--border);margin:0 auto;box-shadow:0 24px 60px -34px rgba(0,0,0,.85);touch-action:none}
+  .pitchbg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .tok-layer{position:absolute;inset:0}
+  .pitch-empty{position:absolute;left:16px;right:16px;bottom:16px;text-align:center;color:rgba(255,255,255,.62);font-size:13px;line-height:1.5}
+  .tok{position:absolute;transform:translate(-50%,-50%);touch-action:none;cursor:grab;display:flex;flex-direction:column;align-items:center;gap:4px;user-select:none;-webkit-user-select:none;animation:pop .18s ease}
+  @keyframes pop{from{opacity:0;transform:translate(-50%,-50%) scale(.7)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+  .tok.drag{cursor:grabbing;z-index:6}.tok.drag .jer{transform:scale(1.1)}
+  .tok .jer{width:44px;height:44px;border-radius:50%;background:linear-gradient(180deg,#3ddc61,#1a8f37);color:#04120a;font-family:var(--mono);font-weight:600;font-size:16px;display:grid;place-items:center;border:2px solid rgba(255,255,255,.9);box-shadow:0 5px 14px rgba(0,0,0,.55);transition:transform .12s}
+  .tok .lab{font-size:11px;color:#fff;background:rgba(0,0,0,.58);padding:1px 7px;border-radius:6px;white-space:nowrap;max-width:86px;overflow:hidden;text-overflow:ellipsis}
+  .tok .x{position:absolute;top:-7px;right:-7px;width:19px;height:19px;border-radius:50%;background:#2a1414;color:#ffb0b0;border:1px solid #5a2b2b;font-size:12px;line-height:1;cursor:pointer;display:none;place-items:center;padding:0}
+  .tok:hover .x{display:grid}
+  .addbar{display:grid;grid-template-columns:90px 1fr auto;gap:10px;align-items:end;margin-top:10px}
+  @media(max-width:420px){.addbar{grid-template-columns:70px 1fr auto}}
+  .cnt2{color:var(--faint);font-family:var(--mono);text-transform:none;letter-spacing:.02em}
+  .kbdhint{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px;line-height:1.5}
   .setup-actions{margin-top:26px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 
   /* match */
@@ -106,22 +109,37 @@ ${headerHtml({ links: [{ href: '/#how', label: 'How it works' }, { href: '/#feat
   <!-- BUILD YOUR SQUAD (one time, persists on device) -->
   <section id="setup" hidden>
     <div class="eyebrow"><span class="sq"></span><span class="lbl">Your squad</span><span class="dots"></span></div>
-    <h1 class="apptitle">Build your <em>squad</em>.</h1>
-    <p class="sub">Do this once. It's saved on your device and ready every match. Add a few players to start and the rest whenever. During games you never type; you just tap the mic and talk.</p>
+    <h1 class="apptitle">Set your <em>formation</em>.</h1>
+    <p class="sub">Add your players and drag them into shape on the pitch. Saved on your device, ready every match. During games you never type; you just tap the mic and talk.</p>
 
-    <div class="card" style="margin-top:28px">
-      <div class="bd">
-        <div style="max-width:340px"><label class="mini">Team name (optional)</label><input type="text" id="teamName" placeholder="e.g. Riverside U-14" autocomplete="off"></div>
+    <div class="setup-wrap">
+      <div class="pitch-wrap" id="pitch">
+        <svg class="pitchbg" viewBox="0 0 100 150" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123016"/><stop offset="1" stop-color="#0b1f0f"/></linearGradient></defs>
+          <rect width="100" height="150" fill="url(#pg)"/>
+          <g fill="#ffffff" fill-opacity="0.02"><rect y="0" width="100" height="18.75"/><rect y="37.5" width="100" height="18.75"/><rect y="75" width="100" height="18.75"/><rect y="112.5" width="100" height="18.75"/></g>
+          <g fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="0.5">
+            <rect x="4" y="4" width="92" height="142" rx="1.5"/>
+            <line x1="4" y1="75" x2="96" y2="75"/>
+            <circle cx="50" cy="75" r="9.5"/>
+            <rect x="28" y="123" width="44" height="23"/><rect x="39.5" y="139.5" width="21" height="6.5"/>
+            <rect x="28" y="4" width="44" height="23"/><rect x="39.5" y="4" width="21" height="6.5"/>
+          </g>
+          <g fill="#ffffff" fill-opacity="0.26"><circle cx="50" cy="75" r="1"/><circle cx="50" cy="130.5" r="1"/><circle cx="50" cy="19.5" r="1"/></g>
+        </svg>
+        <div class="tok-layer" id="tokens"></div>
+        <div class="pitch-empty" id="pitchEmpty">Add your players below — they'll appear on the pitch.<br>Drag them to set your formation.</div>
+      </div>
 
-        <div class="squad-head"><label class="mini" style="margin:0">Players</label><span class="cnt" id="squadCnt">0 players</span></div>
-        <div class="qadd">
-          <div><input type="number" id="pNum" placeholder="No." min="1" max="99"></div>
-          <div><input type="text" id="pName" placeholder="Player name" autocomplete="off"></div>
+      <div class="side-col">
+        <div style="margin-bottom:18px"><label class="mini">Team name (optional)</label><input type="text" id="teamName" placeholder="e.g. Riverside U-14" autocomplete="off"></div>
+        <label class="mini">Add a player <span class="cnt2" id="squadCnt"></span></label>
+        <div class="addbar">
+          <input type="number" id="pNum" placeholder="No." min="1" max="99">
+          <input type="text" id="pName" placeholder="Player name" autocomplete="off">
           <button class="btn pri" id="pAdd">Add</button>
         </div>
-        <div class="kbdhint">Type a number and name, then press Enter for the next.</div>
-        <div class="squad-grid" id="players"></div>
-
+        <div class="kbdhint">Number, name, Enter. Then drag them on the pitch to set your shape.</div>
         <div class="setup-actions">
           <button class="btn pri lg" id="startMatch" disabled>Start a match →</button>
           <span class="muted" id="setupHint" style="font-size:13px"></span>
@@ -198,32 +216,49 @@ function show(view){ $("#setup").hidden=view!=="setup"; $("#match").hidden=view!
 function hasTeam(){ return team && Array.isArray(team.roster) && team.roster.length>0; }
 function boot(){ if(hasTeam()){ if(!match) match={half:1,opponent:"",utterances:[]}; show("match"); } else openSetup(); }
 
-/* ---------- SETUP ---------- */
-let draft=[];
-function openSetup(){ team=team||{name:"",roster:[]}; $("#teamName").value=team.name||""; draft=(team.roster||[]).map(p=>({...p})); renderPlayers(); show("setup"); }
-function renderPlayers(){
-  const el=$("#players");
-  if(!draft.length){ el.innerHTML='<div class="squad-empty">No players yet. Add your squad above — even a few is enough to start.</div>'; }
-  else{ draft.sort((a,b)=>a.number-b.number);
-    el.innerHTML=draft.map((p,i)=>'<div class="jersey"><button class="x" data-i="'+i+'" title="Remove">×</button><div class="no">'+p.number+'</div><div class="nm">'+esc(p.name)+'</div></div>').join(""); }
-  $("#squadCnt").textContent=draft.length+" player"+(draft.length===1?"":"s");
-  $("#startMatch").disabled=draft.length<1;
+/* ---------- SETUP: interactive pitch ---------- */
+let draft=[]; // {number,name,x,y} — x/y are % on the pitch (top=attack, bottom=own goal)
+const SLOTS=[[50,88],[17,73],[39,76],[61,76],[83,73],[26,53],[50,49],[74,53],[26,28],[50,22],[74,28]];
+function slotFor(i){ return SLOTS[i]||[36+((i*19)%44),44+((i*13)%12)]; }
+function role(x,y){ if(y>=82) return "GK"; const s=x<34?"L":x>66?"R":"C"; if(y>=62) return s==="C"?"CB":s+"B"; if(y>=40) return s+"M"; return s==="C"?"ST":s+"W"; }
+function openSetup(){ team=team||{name:"",roster:[]}; $("#teamName").value=team.name||"";
+  draft=(team.roster||[]).map((p,i)=>({number:p.number,name:p.name,x:typeof p.x==="number"?p.x:slotFor(i)[0],y:typeof p.y==="number"?p.y:slotFor(i)[1]}));
+  renderPitch(); show("setup"); }
+function renderPitch(){
+  $("#tokens").innerHTML=draft.map((p,i)=>'<div class="tok" data-i="'+i+'" style="left:'+p.x+'%;top:'+p.y+'%"><button class="x" data-x="'+i+'" title="Remove">×</button><div class="jer">'+p.number+'</div><div class="lab">'+esc(p.name)+'</div></div>').join("");
+  $("#pitchEmpty").style.display=draft.length?"none":"block";
+  $("#squadCnt").textContent=draft.length?("· "+draft.length+" on the pitch"):"";
+  $("#startMatch").disabled=draft.length<1; bindDrag();
 }
 function addPlayer(){
   const num=parseInt($("#pNum").value,10), name=$("#pName").value.trim();
   if(!Number.isInteger(num)||!name){ $("#setupHint").textContent="Enter a number and a name."; return; }
   if(draft.some(p=>p.number===num)){ $("#setupHint").textContent="Number "+num+" is already taken."; return; }
-  draft.push({number:num,name}); $("#pNum").value=""; $("#pName").value=""; $("#setupHint").textContent=""; $("#pNum").focus(); renderPlayers();
+  const s=slotFor(draft.length); draft.push({number:num,name,x:s[0],y:s[1]});
+  $("#pNum").value=""; $("#pName").value=""; $("#setupHint").textContent=""; $("#pNum").focus(); renderPitch();
+}
+function bindDrag(){
+  const pitch=$("#pitch");
+  $("#tokens").querySelectorAll(".tok").forEach(tok=>{
+    tok.onpointerdown=(e)=>{
+      if(e.target.closest(".x")) return; e.preventDefault();
+      const i=+tok.dataset.i; tok.classList.add("drag"); try{ tok.setPointerCapture(e.pointerId); }catch(_){}
+      const rect=pitch.getBoundingClientRect();
+      const move=(ev)=>{ let x=(ev.clientX-rect.left)/rect.width*100, y=(ev.clientY-rect.top)/rect.height*100; x=Math.max(5,Math.min(95,x)); y=Math.max(4,Math.min(96,y)); tok.style.left=x+"%"; tok.style.top=y+"%"; if(draft[i]){ draft[i].x=x; draft[i].y=y; } };
+      const up=()=>{ tok.classList.remove("drag"); tok.removeEventListener("pointermove",move); tok.removeEventListener("pointerup",up); tok.removeEventListener("pointercancel",up); };
+      tok.addEventListener("pointermove",move); tok.addEventListener("pointerup",up); tok.addEventListener("pointercancel",up);
+    };
+  });
 }
 $("#pAdd").onclick=addPlayer;
 $("#pNum").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#pName").focus(); }});
 $("#pName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); addPlayer(); }});
-$("#players").addEventListener("click",e=>{ const b=e.target.closest("[data-i]"); if(b){ draft.splice(+b.dataset.i,1); renderPlayers(); }});
-$("#startMatch").onclick=()=>{ team={name:$("#teamName").value.trim()||"My team",roster:draft.map(p=>({...p}))}; save(TEAM_KEY,team); if(!match) match={half:1,opponent:"",utterances:[]}; saveMatch(); show("match"); };
+$("#tokens").addEventListener("click",e=>{ const b=e.target.closest("[data-x]"); if(b){ draft.splice(+b.dataset.x,1); renderPitch(); }});
+$("#startMatch").onclick=()=>{ team={name:$("#teamName").value.trim()||"My team",roster:draft.map(p=>({number:p.number,name:p.name,x:p.x,y:p.y,position:role(p.x,p.y)}))}; save(TEAM_KEY,team); if(!match) match={half:1,opponent:"",utterances:[]}; saveMatch(); show("match"); };
 
 /* ---------- MATCH ---------- */
 function saveMatch(){ save(MATCH_KEY,match); }
-function rosterForApi(){ return team.roster.map(p=>({number:p.number,name:p.name})); }
+function rosterForApi(){ return team.roster.map(p=>({number:p.number,name:p.name,position:p.position})); }
 function renderMatch(){
   $("#teamLbl").textContent=team.name; $("#oppInput").value=match.opponent||"";
   $("#squad").innerHTML=team.roster.slice().sort((a,b)=>a.number-b.number).map(p=>'<span class="num"><b>#'+p.number+'</b> '+esc(p.name)+'</span>').join("");
